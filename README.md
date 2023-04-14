@@ -34,7 +34,7 @@ The scripts expect four environment variables to be set in the travis environmen
 Building libsyscall_intercept requires cmake.
 Example:
 ```sh
-cmake path_to_syscall_intercept -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
+cmake path_to_syscall_intercept -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=clang
 make
 ```
 alternatively:
