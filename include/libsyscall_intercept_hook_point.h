@@ -49,13 +49,20 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
-extern int (*intercept_hook_point)(long syscall_number,
+extern thread_local int (*intercept_hook_point)(long syscall_number,
 			long arg0, long arg1,
 			long arg2, long arg3,
 			long arg4, long arg5,
-			long *result);
+			long *result)
+	__attribute__((tls_model("initial-exec")));
+#else
+extern _Thread_local int (*intercept_hook_point)(long syscall_number,
+			long arg0, long arg1,
+			long arg2, long arg3,
+			long arg4, long arg5,
+			long *result)
+	__attribute__((tls_model("initial-exec")));
+#endif
 
 extern void (*intercept_hook_point_clone_child)(void);
 extern void (*intercept_hook_point_clone_parent)(long pid);

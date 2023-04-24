@@ -61,11 +61,12 @@
 #include "disasm_wrapper.h"
 #include "magic_syscalls.h"
 
-int (*intercept_hook_point)(long syscall_number,
+_Thread_local int (*intercept_hook_point)(long syscall_number,
 			long arg0, long arg1,
 			long arg2, long arg3,
 			long arg4, long arg5,
 			long *result)
+	__attribute__((tls_model("initial-exec")))
 	__attribute__((visibility("default")));
 
 void (*intercept_hook_point_clone_child)(void)
