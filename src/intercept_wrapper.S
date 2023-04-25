@@ -53,6 +53,10 @@
 .global intercept_routine_must_save_ymm
 .hidden intercept_routine_must_save_ymm
 
+.global intercept_hook_point
+.hidden intercept_hook_point
+.type intercept_hook_point, @tls_object
+
 .text
 
 /*
@@ -90,6 +94,46 @@ intercept_wrapper:
 	subq        $0x448, %rsp
 	.cfi_def_cfa_offset 0x0
 
+	cmp         $0x1, %rcx
+	je          3f
+
+	/* SYS_vfork */
+	cmp         $58, %eax
+	je          0f
+	/* SYS_rt_sigreturn */
+	cmp         $15, %eax
+	je          0f
+	/* SYS_clone */
+	cmp         $56, %eax
+	je          2f
+	/* SYS_clone3 */
+	cmp         $435, %eax
+	je          2f
+
+	cmpq        $0x0, intercept_hook_point (%rip)
+	jne         3f
+
+0:
+	/*
+	 * SYS_vfork & SYS_rt_sigreturn
+	 *
+	 * r11 == 0x00: Call syscall in original context.
+	 */
+	movq        0x00, %r11
+1:
+	addq        $0x448, %rsp
+	retq
+2:
+	/*
+	 * SYS_clone & SYS_clone3
+	 *
+	 * r11 == 0x02: Call syscall in original context,
+	 * then call intercept_wrapper again with rcx == 0x01
+	 */
+	movq        0x02, %r11
+	jmp         1b
+
+3:
 	/* Save all GPRs on the stack */
 	movq        %rax, 0x160 (%rsp)
 	.cfi_offset 0, 0x160
